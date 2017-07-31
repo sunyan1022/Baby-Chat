@@ -4,8 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMError;
 import com.hyphenate.EMMessageListener;
@@ -19,7 +22,13 @@ import com.hyphenate.easeui.domain.EaseEmojiconGroupEntity;
 import com.hyphenate.easeui.model.EmojiconExampleGroupData;
 import com.hyphenate.easeui.receiver.CallReceiver;
 import com.hyphenate.util.EMLog;
+import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechSynthesizer;
+import com.iflytek.cloud.SynthesizerListener;
 import com.ozj.baby.mvp.views.home.activity.MainActivity;
+import com.ozj.baby.util.MessageModel;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +47,7 @@ public class EaseUIHelper {
         this.mAppContext = context;
     }
 
-
+    public SpeechSynthesizer mTts;
 
     public void init() {
         if (EaseUI.getInstance().init(mAppContext, null)) {
@@ -131,9 +140,22 @@ public class EaseUIHelper {
             public void onMessageReceived(List<EMMessage> messages) {
                 for (EMMessage message : messages) {
                     EMLog.d("EaseuiHelper", "onMessageReceived id : " + message.getMsgId());
+
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if (!easeUI.hasForegroundActivies()) {
                         easeUI.getNotifier().onNewMsg(message);
+
+                        mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
+                        //设置发音人
+                        mTts.setParameter(SpeechConstant.VOICE_NAME,"xiaoyan");
+                        //设置音调
+                        mTts.setParameter(SpeechConstant.PITCH,"50");
+                        //设置音量
+                        mTts.setParameter(SpeechConstant.VOLUME,"50");
+
+                        int code = mTts.startSpeaking(message.getBody().toString().substring(4), mTtsListener);
+                        Log.d("mylog",message.getBody().toString().substring(4));
+
                     }
                 }
             }
@@ -142,6 +164,7 @@ public class EaseUIHelper {
             public void onCmdMessageReceived(List<EMMessage> messages) {
                 for (EMMessage message : messages) {
                     EMLog.d("EaseuiHelper", "收到透传消息");
+
                     //获取消息body
                     EMCmdMessageBody cmdMsgBody = (EMCmdMessageBody) message.getBody();
                     final String action = cmdMsgBody.action();//获取自定义action
@@ -170,6 +193,20 @@ public class EaseUIHelper {
                     Intent broadcastIntent = new Intent(CMD_TOAST_BROADCAST);
                     broadcastIntent.putExtra("cmd_value", str + action);
                     mAppContext.sendBroadcast(broadcastIntent, null);
+
+
+
+                    mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
+                    //设置发音人
+                    mTts.setParameter(SpeechConstant.VOICE_NAME,"xiaoyan");
+                    //设置音调
+                    mTts.setParameter(SpeechConstant.PITCH,"50");
+                    //设置音量
+                    mTts.setParameter(SpeechConstant.VOLUME,"50");
+
+                    int code = mTts.startSpeaking(message.getBody().toString().substring(4), mTtsListener);
+                    Log.d("mylog",message.getBody().toString().substring(4));
+
                 }
             }
 
@@ -189,5 +226,55 @@ public class EaseUIHelper {
 
         EMClient.getInstance().chatManager().addMessageListener(messageListener);
     }
+
+
+    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+        @Override
+        public void onSpeakBegin() {
+        }
+        @Override
+        public void onSpeakPaused() {
+        }
+        @Override
+        public void onSpeakResumed() {
+        }
+        @Override
+        public void onBufferProgress(int percent, int beginPos, int endPos,
+                                     String info) {
+        }
+        @Override
+        public void onSpeakProgress(int percent, int beginPos, int endPos) {
+        }
+
+
+
+        @Override
+        public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onCompleted(SpeechError error) {
+            if(error!=null)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+    };
+
+
+
+    private InitListener myInitListener = new InitListener() {
+        @Override
+        public void onInit(int code) {
+            Log.d("mySynthesiezer:", "InitListener init() code = " + code);
+        }
+    };
+
+
 }
 

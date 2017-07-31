@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,6 +16,12 @@ import android.widget.TextView;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.hyphenate.chat.EMClient;
+import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechSynthesizer;
+import com.iflytek.cloud.SpeechUtility;
+import com.iflytek.cloud.util.ResourceUtil;
 import com.jaeger.library.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.ozj.baby.R;
@@ -23,7 +30,7 @@ import com.ozj.baby.mvp.presenter.login.impl.SplashPresenterImpl;
 import com.ozj.baby.mvp.views.home.activity.MainActivity;
 import com.ozj.baby.mvp.views.login.ISplashView;
 import com.ozj.baby.util.PreferenceManager;
-
+import com.iflytek.cloud.SynthesizerListener;
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -54,7 +61,7 @@ public class SplashActivity extends BaseActivity implements ISplashView {
     TextView tvSlogan;
     @BindView(R.id.rootview)
     RelativeLayout rootview;
-
+    public SpeechSynthesizer mTts;
 
     boolean isBlured;
 
@@ -63,7 +70,64 @@ public class SplashActivity extends BaseActivity implements ISplashView {
         super.onCreate(savedInstanceState);
         Logger.init(this.getClass().getSimpleName());
         StatusBarUtil.setColor(this, getResources().getColor(R.color.colorPrimary));
+
+        SpeechUtility.createUtility(SplashActivity.this, SpeechConstant.APPID +"=597e8fa4");
+
+
+
+
     }
+
+
+
+    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+        @Override
+        public void onSpeakBegin() {
+        }
+        @Override
+        public void onSpeakPaused() {
+        }
+        @Override
+        public void onSpeakResumed() {
+        }
+        @Override
+        public void onBufferProgress(int percent, int beginPos, int endPos,
+                                     String info) {
+        }
+        @Override
+        public void onSpeakProgress(int percent, int beginPos, int endPos) {
+        }
+
+
+
+        @Override
+        public void onEvent(int i, int i1, int i2, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onCompleted(SpeechError error) {
+            if(error!=null)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+    };
+
+
+
+    private InitListener myInitListener = new InitListener() {
+        @Override
+        public void onInit(int code) {
+            Log.d("mySynthesiezer:", "InitListener init() code = " + code);
+        }
+    };
+
+
 
     @Override
     protected void initData() {
@@ -176,8 +240,6 @@ public class SplashActivity extends BaseActivity implements ISplashView {
     public void showLoginButton() {
         tvLoginOrRegister.setVisibility(View.VISIBLE);
     }
-
- 
 
 
     @OnClick(R.id.tv_loginOrRegister)

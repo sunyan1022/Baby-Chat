@@ -11,6 +11,7 @@ import com.avos.avoscloud.AVObject;
 import com.avos.avoscloud.AVUser;
 import com.avos.avoscloud.PushService;
 import com.hyphenate.easeui.domain.User;
+
 import com.orhanobut.logger.AndroidLogTool;
 import com.orhanobut.logger.LogLevel;
 import com.orhanobut.logger.Logger;
@@ -70,6 +71,7 @@ public class BabyApplicationLike extends DefaultApplicationLike {
                         }
                     });
         }
+
         initThirdService();
         mEaseUIHelper.init();
     }
@@ -92,7 +94,7 @@ public class BabyApplicationLike extends DefaultApplicationLike {
         LeakCanary.install(getApplication());
         Logger.init("Baby").logLevel(LogLevel.FULL).logTool(new AndroidLogTool());
         AVOSCloud.setDebugLogEnabled(false);
-        FIR.init(getApplication());
+//        FIR.init(getApplication());
         PushService.setDefaultPushCallback(getApplication(), MainActivity.class);
     }
 

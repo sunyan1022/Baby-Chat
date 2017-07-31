@@ -33,6 +33,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //support libray
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+
+
 }
 
 apply from: 'tinkerpatch.gradle'
@@ -43,21 +52,17 @@ dependencies {
     //support libray
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
- 
-//rxjava
+    //rxjava
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.5.2@aar'
-    
     //butterknife
     compile 'com.jakewharton:butterknife:8.5.1'
     apt 'com.jakewharton:butterknife-compiler:8.5.1'
-    
     //leakcanary
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-
     //dagger2
     apt 'com.google.dagger:dagger-compiler:2.8'
     //指定注解处理器
@@ -67,8 +72,8 @@ dependencies {
     //添加android缺失的部分javax注解
 
     //tinker
-    provided("com.tencent.tinker:tinker-android-anno:1.7.7")
-    compile("com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.1.1")
+    provided 'com.tencent.tinker:tinker-android-anno:1.7.7'
+    compile 'com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.1.1'
     //other
     compile 'com.github.jd-alexander:LikeButton:0.2.0'
     compile 'com.facebook.shimmer:shimmer:0.1.0@aar'
@@ -81,9 +86,11 @@ dependencies {
     compile 'jp.wasabeef:recyclerview-animators:2.2.3'
     compile 'com.github.jorgecastilloprz:fabprogresscircle:1.01@aar'
     compile 'com.android.support:multidex:1.0.1'
-
     compile project(':easeui')
- 
+    compile files('libs/Msc.jar')
+    compile files('libs/Sunflower.jar')
 }
+
+
 
 
