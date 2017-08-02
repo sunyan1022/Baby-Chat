@@ -1,9 +1,13 @@
 package com.ozj.baby;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,12 +19,14 @@ import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMCmdMessageBody;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.easeui.EaseConstant;
 import com.hyphenate.easeui.controller.EaseUI;
 import com.hyphenate.easeui.domain.EaseEmojicon;
 import com.hyphenate.easeui.domain.EaseEmojiconGroupEntity;
 import com.hyphenate.easeui.model.EmojiconExampleGroupData;
 import com.hyphenate.easeui.receiver.CallReceiver;
+import com.hyphenate.easeui.shortcutbadger.ShortCutBadgerManager;
 import com.hyphenate.util.EMLog;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.SpeechConstant;
@@ -83,7 +89,6 @@ public class EaseUIHelper {
             registerEventListener();
         }
 
-
     }
 
     private void setEmojiProvider() {
@@ -138,6 +143,9 @@ public class EaseUIHelper {
 
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
+
+                ShortCutBadgerManager.getInstance(mAppContext).applyCount(EMClient.getInstance().chatManager().getUnreadMsgsCount());
+
                 for (EMMessage message : messages) {
                     EMLog.d("EaseuiHelper", "onMessageReceived id : " + message.getMsgId());
 
@@ -147,15 +155,27 @@ public class EaseUIHelper {
 
                         mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
                         //设置发音人
-                        mTts.setParameter(SpeechConstant.VOICE_NAME,"邻家姐姐");
+                        mTts.setParameter(SpeechConstant.VOICE_NAME,"xiaoyan");
                         //设置音调
                         mTts.setParameter(SpeechConstant.PITCH,"50");
                         //设置音量
                         mTts.setParameter(SpeechConstant.VOLUME,"50");
 
-                        int code = mTts.startSpeaking(message.getBody().toString().substring(4), mTtsListener);
-                        Log.d("mylog",message.getBody().toString().substring(4));
-
+                        if(getheadsetStatsu()!=1){//为1时说明未插入耳机，不显示语音播报
+                            if(message.getType().toString().equals("TXT")){
+                                if(((EMTextMessageBody)message.getBody()).getMessage().contains("[")){
+                                    mTts.startSpeaking("小可爱发来了一个表情", mTtsListener);
+                                }else {
+                                    mTts.startSpeaking("小可爱说："+((EMTextMessageBody)message.getBody()).getMessage(),mTtsListener);
+                                }
+                            }else if(message.getType().toString().equals("LOCATION")){
+                                mTts.startSpeaking("小可爱发来了一个地址", mTtsListener);
+                            }else if(message.getType().toString().equals("VIDEO")){
+                                mTts.startSpeaking("小可爱发来了一个视频",mTtsListener);
+                            }else if(message.getType().toString().equals("VOICE")){
+                                mTts.startSpeaking("小可爱发来了一段语音",mTtsListener);
+                            }
+                        }
                     }
                 }
             }
@@ -194,18 +214,8 @@ public class EaseUIHelper {
                     broadcastIntent.putExtra("cmd_value", str + action);
                     mAppContext.sendBroadcast(broadcastIntent, null);
 
-
-
-                    mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
-                    //设置发音人
-                    mTts.setParameter(SpeechConstant.VOICE_NAME,"vinn");
-                    //设置音调
-                    mTts.setParameter(SpeechConstant.PITCH,"50");
-                    //设置音量
-                    mTts.setParameter(SpeechConstant.VOLUME,"50");
-
-                    int code = mTts.startSpeaking(message.getBody().toString().substring(4), mTtsListener);
-                    Log.d("mylog",message.getBody().toString().substring(4));
+//                    int code = mTts.startSpeaking(message.getBody().toString().substring(4), mTtsListener);
+//                    Log.d("mylog",message.getBody().toString().substring(4));
 
                 }
             }
@@ -266,8 +276,6 @@ public class EaseUIHelper {
         }
     };
 
-
-
     private InitListener myInitListener = new InitListener() {
         @Override
         public void onInit(int code) {
@@ -275,6 +283,52 @@ public class EaseUIHelper {
         }
     };
 
+
+    public int getheadsetStatsu(){
+        AudioManager  audoManager = (AudioManager)mAppContext.getSystemService(Context.AUDIO_SERVICE);
+
+//      IntentFilter iFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+//      Intent iStatus = registerReceiver(null, iFilter);
+//      boolean isConnected = iStatus.getIntExtra("state", 0) == 1;
+//
+//      if(isConnected){
+//         Toast.makeText(MainActivity.this,"耳机ok",Toast.LENGTH_SHORT).show();
+//      }
+
+        if(audoManager.isWiredHeadsetOn()){
+            return 1;
+        }else{
+            Toast.makeText(mAppContext,"耳机不ok",Toast.LENGTH_SHORT).show();
+        }
+
+        BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
+//      int isBlueCon;//蓝牙适配器是否存在，即是否发生了错误
+        if (ba == null){
+//         isBlueCon = -1;     //error
+            return -1;
+        }
+        else if(ba.isEnabled()) {
+            int a2dp = ba.getProfileConnectionState(BluetoothProfile.A2DP);              //可操控蓝牙设备，如带播放暂停功能的蓝牙耳机
+            int headset = ba.getProfileConnectionState(BluetoothProfile.HEADSET);        //蓝牙头戴式耳机，支持语音输入输出
+            int health = ba.getProfileConnectionState(BluetoothProfile.HEALTH);          //蓝牙穿戴式设备
+
+            //查看是否蓝牙是否连接到三种设备的一种，以此来判断是否处于连接状态还是打开并没有连接的状态
+            int flag = -1;
+            if (a2dp == BluetoothProfile.STATE_CONNECTED) {
+                flag = a2dp;
+            } else if (headset == BluetoothProfile.STATE_CONNECTED) {
+                flag = headset;
+            } else if (health == BluetoothProfile.STATE_CONNECTED) {
+                flag = health;
+            }
+            //说明连接上了三种设备的一种
+            if (flag != -1) {
+//            isBlueCon = 1;            //connected
+                return 2;
+            }
+        }
+        return -2;
+    }
 
 }
 

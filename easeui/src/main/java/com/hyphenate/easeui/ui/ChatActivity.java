@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.hyphenate.easeui.EaseConstant;
 import com.hyphenate.easeui.R;
 import com.hyphenate.easeui.controller.EaseUI;
+import com.hyphenate.easeui.shortcutbadger.ShortCutBadgerManager;
 import com.jaeger.library.StatusBarUtil;
 
 public class ChatActivity extends EaseBaseActivity {
@@ -33,6 +34,7 @@ public class ChatActivity extends EaseBaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        ShortCutBadgerManager.getInstance(ChatActivity.this).removeCount();
     }
 
 
