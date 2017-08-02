@@ -147,7 +147,7 @@ public class EaseUIHelper {
 
                         mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
                         //设置发音人
-                        mTts.setParameter(SpeechConstant.VOICE_NAME,"xiaoyan");
+                        mTts.setParameter(SpeechConstant.VOICE_NAME,"邻家姐姐");
                         //设置音调
                         mTts.setParameter(SpeechConstant.PITCH,"50");
                         //设置音量
@@ -198,7 +198,7 @@ public class EaseUIHelper {
 
                     mTts = SpeechSynthesizer.createSynthesizer(mAppContext, myInitListener);
                     //设置发音人
-                    mTts.setParameter(SpeechConstant.VOICE_NAME,"xiaoyan");
+                    mTts.setParameter(SpeechConstant.VOICE_NAME,"vinn");
                     //设置音调
                     mTts.setParameter(SpeechConstant.PITCH,"50");
                     //设置音量
